@@ -48,9 +48,8 @@ const thoughtController = {
 
     // Controller for deleting a thought
     deleteThought(req, res) {
-        const thoughtId = req.params.thoughtId;
-
-        thought.findOneAndUpdate(thoughtId)
+        thoughtId = req.params.thoughtId;
+        thought.findOneAndUpdate(req.params.thoughtId)
         .then(thought => {
             if(!thought){
                 res.status(404).json({message: 'Thought not found'});
