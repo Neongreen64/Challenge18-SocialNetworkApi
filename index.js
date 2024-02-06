@@ -8,6 +8,6 @@ const PORT = process.env.PORT || 3001;
 app.use(express.json());
 app.use(routes);
 
-mongoose.connect('mongodb://localhost:27017/social-network-api');
+mongoose.connect('mongodb://127.0.0.1:27017/social-network-api');
 
 app.listen(PORT, () => console.log(`App listening on port ${PORT}`));

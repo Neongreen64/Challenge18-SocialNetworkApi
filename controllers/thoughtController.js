@@ -35,7 +35,7 @@ const thoughtController = {
         const thoughtId = req.params.thoughtId;
         const { thoughtText } = req.body;
 
-        thought.findByIdAndUpdate(thoughtId, { thoughtText }, { new: true })
+        thought.findOneAndUpdate(thoughtId, { thoughtText }, { new: true })
           .then((thought) => {
             // If the thought is not found, return a 404 status
             if (!thought) {
@@ -50,13 +50,13 @@ const thoughtController = {
     deleteThought(req, res) {
         const thoughtId = req.params.thoughtId;
 
-        thought.findByIdAndUpdate(thoughtId)
+        thought.findOneAndUpdate(thoughtId)
         .then(thought => {
             if(!thought){
                 res.status(404).json({message: 'Thought not found'});
             }
             // Pull the thought id from the user's thoughts array and return the updated user
-            return user.findByIdAndUpdate(thought.userId, { $pull: { thoughts: thoughtId } }, { new: true })
+            return user.findOneAndUpdate(thought.userId, { $pull: { thoughts: thoughtId } }, { new: true })
         }).then((user) => res.json({ message: 'Thought deleted successfully', user }))
         .catch((e) => res.status(500).json(e));
     },

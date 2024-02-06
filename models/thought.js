@@ -2,7 +2,26 @@
 const mongoose = require('mongoose');
 
 // Import the reaction schema from the Reaction file
-const reactionSchema = require('./Reaction');
+const reactionSchema = new mongoose.Schema({
+    reactionId: {
+        type: mongoose.Schema.Types.ObjectId, // Define the type as an ObjectId
+        default: () => new mongoose.Types.ObjectId(), // Set the default value to a new ObjectId
+    },
+    reactionBody: {
+        type: String, // Define the type as String
+        required: true, // Ensure this field is required
+        maxlength: 280, // Set the maximum length to 280 characters
+    },
+    username: {
+        type: String, // Define the type as String
+        required: true, // Ensure this field is required
+    },
+    createdAt: {
+        type: Date, // Define the type as Date
+        default: Date.now, // Set the default value to the current date and time
+        get: (timestamp) => dateFormat(timestamp), // Define a custom getter function to format the timestamp
+    },
+});
 
 // Define the thought schema using mongoose
 const thoughtSchema = new mongoose.Schema({

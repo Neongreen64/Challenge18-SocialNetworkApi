@@ -39,6 +39,14 @@ userSchema.virtual('friendCount').get(function () {
     return this.friends.length;
 });
 
+userSchema.set('toJSON', {
+    virtuals:true,
+    transform: function(doc,ret){
+        delete ret._id;
+        delete ret.__v;
+    },
+});
+
 // Create a user model based on the user schema
 const user = mongoose.model('user', userSchema);
 

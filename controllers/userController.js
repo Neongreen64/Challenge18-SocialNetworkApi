@@ -1,52 +1,58 @@
 // Import the User and Thought models
-const { User, Thought } = require('../models');
+const { user, thought } = require('../models');
 
 // Define the userController object to contain all user-related controller functions
 const userController = {
     // Retrieve all users with their friends and thoughts, sorted by username
+    // getAllUsers(req, res) {
+    //     user.find()
+    //         .populate('friends')
+    //         .populate('thoughts')
+    //         .then((userData) => res.json(userData))
+    //         .catch((err) => res.status(400).json(err));
+    // },
     getAllUsers(req, res) {
-        User.find()
-            .populate('friends')
-            .populate('thoughts')
-            .sort({ username: 1 })
-            .then((users) => res.json(users))
+        user.find()
+            .then((userData) => res.json(userData))
             .catch((err) => res.status(400).json(err));
     },
     // Retrieve a user by their ID, including their friends and thoughts
     getUserById(req, res) {
-        User.findById(req.params.id)
-            .populate('friends')
-            .populate('thoughts')
+        user.findOne(req.params.id)
             .then((user) => res.json(user))
             .catch((err) => res.status(400).json(err));
     },
     // Create a new user with the provided username and email
     createUser(req, res) {
-        const { username, email } = req.body;
-        User.create({ username, email })
-            .then((user) => res.json(user))
-            .catch((err) => res.status(400).json(err));
+        user.create(req.body)
+        .then((userData) => res.json(userData))
+        .catch((err) => res.status(400).json(err));
     },
     // Update a user's information by their ID with the provided username and email
     updateUser(req, res) {
         const userId = req.params.userId;
-        const { username, email } = req.body;
+    const { username, email } = req.body;
 
-        User.findByIdAndUpdate(userId, { username, email }, { new: true })
-            .then((user) => res.json(user))
-            .catch((err) => res.status(400).json(err));
+    user.findByIdAndUpdate(userId, { username, email }, { new: true })
+      .then((user) => {
+        if (!user) {
+          return res.status(404).json({ message: 'User not found' });
+        }
+        res.json({ message: 'User updated successfully', user });
+      })
+      .catch((err) => res.status(500).json(err));
     },
     // Delete a user by their ID, along with their associated thoughts and friends
     deleteUser(req, res) {
         const userId = req.params.userId;
 
-        User.findByIdAndDelete(userId)
+        user.findByIdAndDelete(userId)
             .then((user) => {
                 if (!user) {
                     return res.status(404).json({ message: 'User not found' });
                 }
-                const deleteThoughts = Thought.deleteMany({ _id: { $in: user.thoughts } });
-                const deleteFriends = User.updateMany(
+                const deleteThoughts = thought.deleteMany({ _id: { $in: user.thoughts } });
+                const deleteFriends = user.updateMany(
                     { _id: { $in: user.friends } },
                     { $pull: { friends: userId } }
                 );
@@ -65,13 +71,13 @@ const userController = {
             return res.status(400).json({ message: 'Cannot add yourself as a friend' });
         }
 
-        User.findByIdAndUpdate(userId, { $addToSet: { friends: friendId } }, { new: true })
+        user.findByIdAndUpdate(userId, { $addToSet: { friends: friendId } }, { new: true })
             .then((user) => {
                 if (!user) {
                     return res.status(404).json({ message: 'User not found' });
                 }
                 // Add the user's ID to the friend's friends array
-                return User.findByIdAndUpdate(friendId, { $addToSet: { friends: userId } }, { new: true });
+                return user.findByIdAndUpdate(friendId, { $addToSet: { friends: userId } }, { new: true });
             })
             .then((friend) => res.json({ message: 'Friend added successfully', friend }))
             .catch((err) => res.status(500).json(err));
@@ -81,13 +87,13 @@ const userController = {
         const userId = req.params.userId;
         const { friendId } = req.params;
 
-        User.findByIdAndUpdate(userId, { $pull: { friends: friendId } }, { new: true })
+        user.findByIdAndUpdate(userId, { $pull: { friends: friendId } }, { new: true })
             .then((user) => {
                 if (!user) {
                     return res.status(404).json({ message: 'User not found' });
                 }
                 // Remove the user's ID from the friend's friends array
-                return User.findByIdAndUpdate(friendId, { $pull: { friends: userId } }, { new: true });
+                return user.findByIdAndUpdate(friendId, { $pull: { friends: userId } }, { new: true });
             })
             .then((friend) => res.json({ message: 'Friend deleted successfully', friend }))
             .catch((err) => res.status(500).json(err));

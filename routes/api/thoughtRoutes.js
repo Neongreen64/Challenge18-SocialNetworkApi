@@ -23,3 +23,5 @@ router.route('/:id').get(getThoughtById).put(updateThought).delete(deleteThought
 
 // Define the routes for adding and deleting a reaction for a specific thought
 router.route('/:thoughtId/reactions').post(createReaction).delete(deleteReaction);
+
+module.exports = router;
